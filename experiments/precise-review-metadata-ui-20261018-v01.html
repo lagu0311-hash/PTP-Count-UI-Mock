@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>PTP Count 精密レビュー UI Mock v0.1</title>
+  <style>
+    :root{
+      --navy:#173b67;
+      --blue:#2f68a4;
+      --lightblue:#edf4fb;
+      --green:#dceee2;
+      --active:#2d69a7;
+      --inactive:#dde5ef;
+      --bg:#eef2f7;
+      --card:#ffffff;
+      --line:#d8e0ea;
+      --text:#18314f;
+      --muted:#66788c;
+      --warn:#f5ede3;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    .app{max-width:860px;margin:0 auto;padding-bottom:40px}
+    .hero{
+      background:var(--navy);color:#fff;padding:26px 20px 18px;
+      position:sticky;top:0;z-index:20;
+      box-shadow:0 2px 12px rgba(0,0,0,.08);
+    }
+    .hero h1{margin:0;font-size:24px;font-weight:800;letter-spacing:.01em}
+    .hero p{margin:6px 0 0;font-size:14px;opacity:.92}
+    .wrap{padding:14px}
+    .banner{
+      background:var(--warn);border-radius:16px;padding:14px 16px;margin-bottom:12px;
+      font-weight:700;
+    }
+    .note{font-size:13px;color:var(--muted)}
+    .status-line{
+      display:flex;align-items:flex-start;gap:10px;margin:12px 0 14px;
+      font-size:15px;font-weight:700;
+    }
+    .status-line input{margin-top:2px;transform:scale(1.25)}
+    .steps{
+      display:flex;gap:8px;overflow:auto;padding-bottom:4px;margin-bottom:14px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .steps::-webkit-scrollbar{display:none}
+    .step-pill{
+      border:none;border-radius:12px;padding:12px 16px;white-space:nowrap;
+      background:var(--inactive);color:#334e68;font-weight:700;font-size:15px;
+    }
+    .step-pill.done{background:var(--green)}
+    .step-pill.active{background:var(--active);color:#fff}
+    .card{
+      background:var(--card);border-radius:24px;padding:20px 16px;border:1px solid rgba(23,59,103,.06);
+      box-shadow:0 10px 30px rgba(20,43,74,.06);
+    }
+    .screen{display:none}
+    .screen.active{display:block}
+    .screen h2{margin:4px 0 14px;font-size:22px;line-height:1.3}
+    .soft{
+      background:#eef4f9;border-radius:16px;padding:14px 16px;margin-bottom:14px;
+      color:#304b67
+    }
+    .grid{display:grid;gap:12px}
+    .cols-2{grid-template-columns:1fr 1fr}
+    @media (max-width:680px){.cols-2{grid-template-columns:1fr}}
+    .field{display:grid;gap:6px}
+    .field label{font-weight:700;font-size:15px}
+    .field small{color:var(--muted);font-size:12px}
+    input[type=text],input[type=number],input[type=date],select,textarea{
+      width:100%;border:1px solid #cfd8e3;border-radius:14px;padding:14px 14px;
+      font-size:16px;background:#fff;color:var(--text);
+    }
+    textarea{min-height:110px;resize:vertical}
+    .radio-group,.chip-group{display:flex;flex-wrap:wrap;gap:8px}
+    .radio-group label,.chip{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;
+      border:1px solid #cfd8e3;background:#fff;font-size:14px;font-weight:700;
+    }
+    .section-title{font-size:18px;font-weight:800;margin:20px 0 12px}
+    .details-box{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fbfcfe}
+    .details-box summary{
+      list-style:none;padding:15px 16px;font-weight:800;cursor:pointer;background:#f6f9fc;
+    }
+    .details-box summary::-webkit-details-marker{display:none}
+    .details-box .content{padding:14px 16px}
+    .info-list{display:grid;gap:12px}
+    .count-box{
+      background:#eef3f7;border-radius:18px;padding:16px;text-align:center;font-weight:800;
+    }
+    .count-box .num{font-size:34px;line-height:1;margin-bottom:6px}
+    .preview{
+      border-radius:18px;overflow:hidden;background:#dfe8f0;border:1px solid #cfd8e3;
+      display:flex;align-items:center;justify-content:center;min-height:250px;
+    }
+    .preview svg{display:block;max-width:100%;height:auto}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+    button,.btn{
+      appearance:none;border:none;border-radius:16px;background:var(--active);color:#fff;
+      padding:14px 18px;font-size:17px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+    }
+    .btn.secondary{background:#fff;color:var(--navy);border:2px solid #b8c8db}
+    .btn.ghost{background:#eef4fa;color:var(--navy)}
+    .btn.muted{background:#f1f3f6;color:#9aa7b5}
+    .btn.small{padding:10px 14px;font-size:15px;border-radius:14px}
+    .footer-nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:18px}
+    .footer-nav .left,.footer-nav .right{display:flex;gap:10px;flex-wrap:wrap}
+    .tag{display:inline-block;padding:4px 10px;border-radius:999px;background:#eef4fa;color:#30506f;font-size:12px;font-weight:800}
+    .kv{display:grid;grid-template-columns:150px 1fr;gap:10px 12px}
+    .kv div:nth-child(odd){font-weight:800}
+    @media (max-width:560px){.kv{grid-template-columns:1fr}.kv div:nth-child(odd){margin-top:6px}}
+    .subtle{color:var(--muted);font-size:13px}
+    .hr{height:1px;background:var(--line);margin:16px 0}
+    .success{color:#1f6a3d;font-weight:800}
+    .danger{color:#9d2f2f;font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <h1>PTP Count｜精密レビュー</h1>
+      <p>UI Mock v0.1 ・ metadata設計検討用 ・ 保存/AIは動作しません</p>
+    </header>
+
+    <div class="wrap">
+      <div class="banner">検討中の画面構成：<strong>1.画像準備 → 2.人間点 → 3.固定・AI待ち → 4.6モード判定 → 5.画像・撮影情報 → 6.完成確認</strong></div>
+
+      <div class="status-line">
+        <span class="tag">1ページ目でprivacy確認</span>
+        <div>このモックでは、<strong>privacy確認は1ページ目だけ</strong>で行う前提です。2ページ目以降には重複チェック欄を置きません。</div>
+      </div>
+
+      <div class="steps" id="steps"></div>
+
+      <section class="card">
+        <div class="screen active" data-step="0">
+          <h2>1. 画像準備</h2>
+          <div class="soft">最初に画像を選び、由来とprivacy確認を行います。実アプリでは、この確認後に原画像保存へ進む想定です。</div>
+
+          <div class="section-title">取込方法</div>
+          <div class="radio-group">
+            <label><input type="radio" name="sourceMethod" value="camera" checked> Safariから撮影</label>
+            <label><input type="radio" name="sourceMethod" value="photo"> 写真アプリ・ファイルから選択</label>
+          </div>
+
+          <div class="grid cols-2" style="margin-top:14px">
+            <div class="field">
+              <label>画像ファイル</label>
+              <input type="text" value="IMG_2246.jpeg（例）" readonly>
+              <small>UIモックのため固定表示です。実装時は実画像入力に接続します。</small>
+            </div>
+            <div class="field">
+              <label>画像の由来</label>
+              <select>
+                <option selected>薬剤部在庫</option>
+                <option>患者由来（持参薬鑑別）</option>
+                <option>患者由来（返品処理）</option>
+                <option>薬剤部員個人所有</option>
+                <option>その他</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="field">
+              <label>撮影session <span class="subtle">（不明なら空欄）</span></label>
+              <input type="text" placeholder="例：20261018_AM_01">
+            </div>
+            <div class="field">
+              <label>子片group <span class="subtle">（不明なら空欄）</span></label>
+              <input type="text" placeholder="例：part02-of02">
+            </div>
+          </div>
+
+          <div class="field">
+            <label><input id="privacyStep1" type="checkbox"> 個人識別情報が含まれないことを確認</label>
+            <small>privacy確認は原則ここだけで実施し、後続画面では状態表示のみにします。</small>
+          </div>
+
+          <div class="footer-nav">
+            <div class="right"><button class="btn" data-next>人間点へ進む →</button></div>
+          </div>
+        </div>
+
+        <div class="screen" data-step="1">
+          <h2>2. 人間正解点の作成</h2>
+          <div class="soft">AI点はまだ表示しません。人間が薬入りポケット中心へG点を付ける工程です。</div>
+          <div class="count-box"><div class="num" id="gCountTop">8</div>正解点（G）</div>
+          <div class="toolbar">
+            <button class="btn secondary small">− 縮小</button>
+            <button class="btn secondary small">＋ 拡大</button>
+            <button class="btn secondary small">全体表示</button>
+            <button class="btn ghost small">UNDO</button>
+          </div>
+          <div class="preview">
+            <svg viewBox="0 0 280 280" width="100%" aria-hidden="true">
+              <rect width="280" height="280" fill="#dbe3ea"/>
+              <g fill="#fff" stroke="#9ba8b7" stroke-width="1.5">
+                <ellipse cx="64" cy="52" rx="18" ry="30"/><ellipse cx="140" cy="52" rx="18" ry="30"/><ellipse cx="216" cy="52" rx="18" ry="30"/>
+                <ellipse cx="64" cy="135" rx="18" ry="30"/><ellipse cx="140" cy="135" rx="18" ry="30"/><ellipse cx="216" cy="135" rx="18" ry="30"/>
+                <ellipse cx="64" cy="220" rx="18" ry="30"/><ellipse cx="140" cy="220" rx="18" ry="30"/>
+              </g>
+              <g fill="#38a169" stroke="#fff" stroke-width="2">
+                <circle cx="64" cy="52" r="6"/><circle cx="140" cy="52" r="6"/><circle cx="216" cy="52" r="6"/>
+                <circle cx="64" cy="135" r="6"/><circle cx="140" cy="135" r="6"/><circle cx="216" cy="135" r="6"/>
+                <circle cx="64" cy="220" r="6"/><circle cx="140" cy="220" r="6"/>
+              </g>
+            </svg>
+          </div>
+          <div class="footer-nav">
+            <div class="left"><button class="btn secondary" data-prev>← 戻る</button></div>
+            <div class="right"><button class="btn" data-next>固定・AI待ちへ →</button></div>
+          </div>
+        </div>
+
+        <div class="screen" data-step="2">
+          <h2>3. 固定・AI待ち</h2>
+          <div class="soft">G点を確認して固定し、その後にAI実行へ進む想定です。ここではモックとして状態だけ示します。</div>
+          <div class="info-list">
+            <div class="count-box"><div class="num">8</div>固定対象のG点</div>
+            <div class="soft"><span class="tag">想定仕様</span> G点固定後にのみAI実行を許可。G情報はAIへ渡さない。</div>
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary">G点を固定</button>
+            <button class="btn">AI実行（モック）</button>
+          </div>
+          <div class="footer-nav">
+            <div class="left"><button class="btn secondary" data-prev>← 戻る</button></div>
+            <div class="right"><button class="btn" data-next>6モード判定へ →</button></div>
+          </div>
+        </div>
+
+        <div class="screen" data-step="3">
+          <h2>4. 6モード判定</h2>
+          <div class="soft">①正解 / ②重複 / ③帰属未確定 / ④検出漏れ / ⑤誤検出 / ⑥判断できないの6モードで判定します。<br>今回の修正要望：<strong>①と②は確定直後に赤い選択枠を解除し、灰色表示へ戻す</strong>。</div>
+          <div class="grid cols-2">
+            <div class="count-box"><div class="num">0</div>未確認の正解点（G）</div>
+            <div class="count-box"><div class="num">0</div>未確認のAI点（A）</div>
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary small">① 正解</button>
+            <button class="btn secondary small">② 重複</button>
+            <button class="btn secondary small">③ 帰属未確定</button>
+            <button class="btn secondary small">④ 検出漏れ</button>
+            <button class="btn secondary small">⑤ 誤検出</button>
+            <button class="btn secondary small">⑥ 判断できない</button>
+          </div>
+          <div class="soft success">モック表示：全点レビュー済み。次に metadata / 撮影条件を記録する新しい画面へ進みます。</div>
+          <div class="footer-nav">
+            <div class="left"><button class="btn secondary" data-prev>← 戻る</button></div>
+            <div class="right"><button class="btn" data-next>画像・撮影情報へ →</button></div>
+          </div>
+        </div>
+
+        <div class="screen" data-step="4">
+          <h2>5. 画像・撮影情報</h2>
+          <div class="soft">旧PTP Countにならい、<strong>カウント/判定のあとに詳細を記録する順番</strong>を採用したUIモックです。A・B項目を残し、Cは自由メモのみとします。</div>
+
+          <div class="section-title">基本情報</div>
+          <div class="grid cols-2">
+            <div class="field">
+              <label>薬剤名・規格</label>
+              <input type="text" value="アゾセミド錠30mg「DSEP」">
+            </div>
+            <div class="field">
+              <label>画像ID / 検体ID</label>
+              <input type="text" value="IMG_2246 / DEV_NEW_unassigned">
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="field">
+              <label>撮影者プリセット</label>
+              <select id="presetSelect">
+                <option value="tsukki" selected>つっきー</option>
+                <option value="sakura">sakura</option>
+                <option value="unknown">その他・不明</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>利用目的</label>
+              <select>
+                <option selected>技術試験</option>
+                <option>開発用</option>
+                <option>その他</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="field">
+              <label>撮影者</label>
+              <input id="capturerField" type="text" value="つっきー">
+            </div>
+            <div class="field">
+              <label>撮影端末</label>
+              <input id="deviceField" type="text" value="iPhone 17 Pro">
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="field">
+              <label>転送経路</label>
+              <select id="transferField">
+                <option selected>写真アプリから選択</option>
+                <option>Safariから直接撮影</option>
+                <option>LINEで受領</option>
+                <option>その他・不明</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>独立評価の扱い</label>
+              <input type="text" value="eligible_for_evaluation = false" readonly>
+              <small>UIから自由変更しない前提です。</small>
+            </div>
+          </div>
+
+          <details class="details-box" open>
+            <summary>撮影条件・詳細設定</summary>
+            <div class="content">
+              <div class="grid cols-2">
+                <div class="field">
+                  <label>撮影日</label>
+                  <input type="date">
+                  <small>EXIF取得値・手入力・不明を区別して実装予定。</small>
+                </div>
+                <div class="field">
+                  <label>アプリ取込日時</label>
+                  <input type="text" value="取込時に自動記録（モック）" readonly>
+                </div>
+              </div>
+
+              <div class="grid cols-2">
+                <div class="field">
+                  <label>撮影台・机</label>
+                  <input type="text" placeholder="例：病棟カウンター / 白机">
+                </div>
+                <div class="field">
+                  <label>背景</label>
+                  <select>
+                    <option selected>無地・均一</option>
+                    <option>特徴あり</option>
+                    <option>不明</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid cols-2">
+                <div class="field">
+                  <label>配置</label>
+                  <select>
+                    <option selected>規則的</option>
+                    <option>不規則</option>
+                    <option>不明</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>PTP片数 <span class="subtle">（任意）</span></label>
+                  <input type="number" placeholder="例：2">
+                </div>
+              </div>
+
+              <div class="grid cols-2">
+                <div class="field">
+                  <label>同一現物 group <span class="subtle">（任意）</span></label>
+                  <input type="text" placeholder="例：A / group-01">
+                </div>
+                <div class="field">
+                  <label>過去AI閲覧状況</label>
+                  <input type="text" value="既知（過去利用あり）" readonly>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="section-title">人間正解点数（G）</div>
+          <div class="count-box"><div class="num" id="gCountMeta">8</div>真の錠数欄は作らず、固定済みG点数を自動表示</div>
+
+          <div class="section-title">自由メモ</div>
+          <div class="field">
+            <label>メモ <span class="subtle">（任意）</span></label>
+            <textarea placeholder="気づいたことを自由に記録。患者識別情報は入力しない。"></textarea>
+          </div>
+
+          <div class="footer-nav">
+            <div class="left"><button class="btn secondary" data-prev>← 戻る</button></div>
+            <div class="right"><button class="btn" data-next>完成確認へ →</button></div>
+          </div>
+        </div>
+
+        <div class="screen" data-step="5">
+          <h2>6. 完成確認</h2>
+          <div class="grid cols-2">
+            <div class="count-box"><div class="num">0</div>未確認の正解点（G）</div>
+            <div class="count-box"><div class="num">0</div>未確認のAI点（A）</div>
+          </div>
+
+          <div class="soft">
+            全点レビュー済み。metadata入力も完了しています。ここでは<strong>完成保存 → JSON書出し → 検証付き読取</strong>の流れを確認します。
+          </div>
+
+          <div class="section-title">保存される想定情報（要約）</div>
+          <div class="kv">
+            <div>薬剤名</div><div>アゾセミド錠30mg「DSEP」</div>
+            <div>撮影者</div><div id="summaryCapturer">つっきー</div>
+            <div>撮影端末</div><div id="summaryDevice">iPhone 17 Pro</div>
+            <div>転送経路</div><div id="summaryTransfer">写真アプリから選択</div>
+            <div>G点数</div><div>8点</div>
+            <div>評価扱い</div><div>eligible_for_evaluation = false</div>
+          </div>
+
+          <div class="toolbar" style="margin-top:18px">
+            <button class="btn secondary">← レビューへ戻る</button>
+            <button class="btn">完成保存</button>
+            <button class="btn muted">JSON書出し</button>
+            <button class="btn muted">検証付き読取</button>
+          </div>
+
+          <div class="soft note">このHTMLはUIモックです。保存処理・JSON生成・読取検証は実行しません。</div>
+
+          <div class="footer-nav">
+            <div class="left"><button class="btn secondary" data-prev>← 戻る</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const labels = [
+      '1. 画像準備',
+      '2. 人間点',
+      '3. 固定・AI待ち',
+      '4. 6モード判定',
+      '5. 画像・撮影情報',
+      '6. 完成確認'
+    ];
+    let step = 0;
+
+    const screens = [...document.querySelectorAll('.screen')];
+    const stepsEl = document.getElementById('steps');
+    function renderSteps(){
+      stepsEl.innerHTML = '';
+      labels.forEach((label, i) => {
+        const b = document.createElement('button');
+        b.className = 'step-pill ' + (i < step ? 'done' : i === step ? 'active' : '');
+        b.textContent = label;
+        b.onclick = () => go(i);
+        stepsEl.appendChild(b);
+      });
+    }
+    function go(n){
+      step = Math.max(0, Math.min(labels.length - 1, n));
+      screens.forEach((s, i) => s.classList.toggle('active', i === step));
+      renderSteps();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      syncSummary();
+    }
+    document.querySelectorAll('[data-next]').forEach(btn => btn.onclick = () => go(step + 1));
+    document.querySelectorAll('[data-prev]').forEach(btn => btn.onclick = () => go(step - 1));
+
+    const presetSelect = document.getElementById('presetSelect');
+    const capturerField = document.getElementById('capturerField');
+    const deviceField = document.getElementById('deviceField');
+    const transferField = document.getElementById('transferField');
+    function applyPreset(){
+      const v = presetSelect.value;
+      if(v === 'tsukki'){
+        capturerField.value = 'つっきー';
+        deviceField.value = 'iPhone 17 Pro';
+        transferField.value = '写真アプリから選択';
+      } else if(v === 'sakura'){
+        capturerField.value = 'sakura';
+        deviceField.value = 'iPhone 14 Pro';
+        transferField.value = 'LINEで受領';
+      } else {
+        capturerField.value = '';
+        deviceField.value = '';
+        transferField.value = 'その他・不明';
+      }
+      syncSummary();
+    }
+    presetSelect.addEventListener('change', applyPreset);
+    capturerField.addEventListener('input', syncSummary);
+    deviceField.addEventListener('input', syncSummary);
+    transferField.addEventListener('change', syncSummary);
+    function syncSummary(){
+      document.getElementById('summaryCapturer').textContent = capturerField.value || '未入力';
+      document.getElementById('summaryDevice').textContent = deviceField.value || '未入力';
+      document.getElementById('summaryTransfer').textContent = transferField.value || '未入力';
+    }
+
+    renderSteps();
+    applyPreset();
+    go(0);
+  </script>
+</body>
+</html>
